@@ -1,5 +1,7 @@
 import re
 
+import common_usage_words
+
 # PHI values to search for
 first_name = 'jane'
 last_name = 'doe'
@@ -30,6 +32,32 @@ def redact_phi(text):
         replacement_text = f'REDACTED_{key.upper()}'
         redacted = pattern.sub(f"*******", redacted)
     return redacted
+
+def redact_phi_conditional(text):
+    redacted = text
+    for key, pattern in patterns.items():
+        redacted = pattern.sub(lambda match: replacement_if_needed(match, key), redacted)
+    return redacted
+
+def replacement_if_needed(match, key):
+    matched_text = match.group()
+    if should_redact(matched_text, key):
+        return f'REDACTED_{key.upper()}'
+    else:
+        return matched_text
+
+def should_redact(text, key):
+    # Customize this logic as needed
+    #Case 1 : Exactly same match words like Na or Da
+    if text == key :
+        return True
+
+    to_be_redacted = common_usage_words.filter_words_result(text)
+    return to_be_redacted
+
+    # return len(text) > 3 and text.lower() not in {'sam', 'joe', 'test'}
+
+
 
 # 🔢 Example strings to process
 texts = [
